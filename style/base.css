@@ -1,0 +1,46 @@
+html {
+    -webkit-text-size-adjust: 100%;
+    font-size: 125%;
+}
+
+body {
+    background-color: #f7f7f7;
+    color: #646464;
+    font-family: Tahoma, sans-serif;
+    font-size: 75%;
+}
+
+h1 {
+    color: #333;
+    font-size: 1.6em;
+    font-weight: normal;
+    line-height: 1.25em;
+    margin-bottom: 16px;
+    margin-top: 0;
+    word-wrap: break-word;
+}
+
+a {
+    color: #585858;
+}
+
+.wrapper {
+    box-sizing: border-box;
+    font-size: 1em;
+    line-height: 1.6em;
+    margin: 100px auto 0;
+    max-width: 600px;
+    width: 100%;
+}
+
+.hidden {
+    display: none;
+}
+
+.right {
+    text-align: right;
+}
+
+canvas {
+    border: 1px solid #c0c0c0;
+}
