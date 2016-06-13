@@ -33,6 +33,21 @@ a {
     width: 100%;
 }
 
+.runner-container {
+    position: relative;
+}
+
+.runner-container canvas {
+    width: 600px;
+    height: 150px;
+}
+
+.runner-container .ai-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 .hidden {
     display: none;
 }
@@ -43,4 +58,8 @@ a {
 
 canvas {
     border: 1px solid #c0c0c0;
+}
+
+pre {
+    line-height: 1;
 }

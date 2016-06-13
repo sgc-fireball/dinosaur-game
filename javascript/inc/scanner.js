@@ -37,25 +37,22 @@ define(['inc/utils'], function () {
         this.detectGameState();
 
         var trex = this.getDinosaurPosition();
-        return this._recursiveValues({
+        return {
             state: this.state == 'running' ? 1 : 0,
-            trex: {
-                x: trex.x / this.image.width,
-                y: trex.x / this.image.height
-            },
-            barriers: this.getBarriers(trex),
-            fitness: this.getFitness() / 10.000
-        });
+            trexX: parseInt(trex.x / this.image.width * 1000) / 1000,
+            trexY: parseInt(trex.y / this.image.height * 1000) / 1000,
+            barriers: this.getBarriers(trex)
+        };
     };
 
-    Scanner.prototype._recursiveValues = function (obj,result) {
+    Scanner.prototype.recursiveValues = function (obj,result) {
         result = !!result ? result : [];
         for (var index in obj) {
             if (!obj.hasOwnProperty(index)) {
                 continue;
             }
             if (typeof(obj[index]) == "object" && obj[index] !== null) {
-                result = this._recursiveValues(obj[index],result);
+                result = this.recursiveValues(obj[index],result);
                 continue;
             }
             result.push(obj[index]);
@@ -123,7 +120,7 @@ define(['inc/utils'], function () {
         var xStop = this.canvas.width - 10;
         if (this.state != 'running') {
             for (i = 0; i < result.length; i++) {
-                result[i] = result[i] / this.image.width;
+                result[i] = parseInt(result[i] / this.image.width * 1000)/1000;
             }
             return result;
         }
@@ -132,13 +129,15 @@ define(['inc/utils'], function () {
             y = (i + 5) * 5;
 
             for (x = xStart; x < xStop; x++) {
-                if (result[offset] == 0 && this.image.getPixel(x, y).isColor(this.color)) {
+                if (result[offset] == 600) {
+                    if (!this.image.getPixel(x, y).isColor(this.color)) {
+                        continue;
+                    }
                     result[offset] = x;
-                }
-                if (result[offset] == 0) {
                     continue;
                 }
-                if (result[offset] + 50 < x) {
+
+                if (result[offset] + 100 < x) {
                     break;
                 }
                 if (this.image.getPixel(x, y).isColor(this.color)) {
@@ -147,7 +146,7 @@ define(['inc/utils'], function () {
             }
         }
         for (i = 0; i < result.length; i++) {
-            result[i] = result[i] / this.image.width;
+            result[i] = parseInt(result[i] / this.image.width * 1000)/1000;
         }
         return result;
     };

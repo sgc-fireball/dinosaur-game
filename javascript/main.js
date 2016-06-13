@@ -8,7 +8,8 @@ define('main',['inc/ai','inc/scanner'], function (AiService,Scanner) {
 
     var ai = new AiService();
     ai.setRunner( new Runner('.wrapper') );
-    ai.setScanner( new Scanner(document.querySelector('canvas')) );
+    ai.setScanner( new Scanner(document.querySelector('canvas.runner-canvas')) );
+    ai.setView( document.querySelector('canvas.ai-canvas') );
     ai.setRawInputContainer( document.querySelector('pre#input') );
     ai.setRawOutputContainer( document.querySelector('pre#output') );
     ai.setRawFitnessContainer( document.querySelector('pre#fitness') );
