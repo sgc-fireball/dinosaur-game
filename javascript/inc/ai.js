@@ -86,8 +86,9 @@ define([
      */
     AI.prototype.run = function () {
         if (!this.init) {
-            var inputLayer = new Layer(this.scanner.getInputs().length);
-            var hiddenLayer = new Layer(parseInt(this.scanner.getInputs().length * 1.33));
+            var inputs = this.scanner.recursiveValues(this.scanner.getInputs()).length;
+            var inputLayer = new Layer(inputs);
+            var hiddenLayer = new Layer(parseInt(inputs * 1.33));
             var outputLayer = new Layer(1);
             inputLayer.project(hiddenLayer);
             hiddenLayer.project(outputLayer);
@@ -123,7 +124,7 @@ define([
                 this.network.activate(plainInputs);
                 this.network.propagate(this.learnRate, [output]);
             } else {
-                output = parseInt(this.network.activate(plainInputs)[0] * 100000) / 100000;
+                output = parseInt(this.network.activate(plainInputs)[0] * 1000) / 1000;
                 if (output < this.thresshold) {
                     this._fakeKeyBoardEvent('keydown', 38); // jump
                     this._fakeKeyBoardEvent('keyup', 40); // down
