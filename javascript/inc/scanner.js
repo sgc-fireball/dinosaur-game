@@ -10,9 +10,10 @@ define(['inc/utils'], function () {
         this.lastStart = 0;
         this.highScore = 0;
         this.output = 0.5;
+        this.barrier = {};
 
         var self = this;
-        document.addEventListener('keydown',function(e){
+        document.addEventListener('keydown', function (e) {
             if (self.state != 'running') {
                 self.output = 0.5;
                 return;
@@ -21,7 +22,7 @@ define(['inc/utils'], function () {
             if (e.keyCode == 32) self.output = 0; // jump
             if (e.keyCode == 40) self.output = 1; // down
         });
-        document.addEventListener('keyup',function(e){
+        document.addEventListener('keyup', function (e) {
             if (self.state != 'running') {
                 self.output = 0.5;
                 return;
@@ -39,20 +40,22 @@ define(['inc/utils'], function () {
         var trex = this.getDinosaurPosition();
         return {
             state: this.state == 'running' ? 1 : 0,
-            trexX: parseInt(trex.x / this.image.width * 1000) / 1000,
-            trexY: parseInt(trex.y / this.image.height * 1000) / 1000,
-            barriers: this.getBarriers(trex)
+            trex: {
+                x: parseInt(trex.x / this.image.width * 1000) / 1000,
+                y: parseInt(trex.y / this.image.height * 1000) / 1000
+            },
+            barrier: this.getBarrier(trex)
         };
     };
 
-    Scanner.prototype.recursiveValues = function (obj,result) {
+    Scanner.prototype.recursiveValues = function (obj, result) {
         result = !!result ? result : [];
         for (var index in obj) {
             if (!obj.hasOwnProperty(index)) {
                 continue;
             }
             if (typeof(obj[index]) == "object" && obj[index] !== null) {
-                result = this.recursiveValues(obj[index],result);
+                result = this.recursiveValues(obj[index], result);
                 continue;
             }
             result.push(obj[index]);
@@ -110,45 +113,36 @@ define(['inc/utils'], function () {
         return pos;
     };
 
-    Scanner.prototype.getBarriers = function (trex) {
-        var max = this.image.width;
-        var i, offset, y, x, xStart = trex.x + 10,
-            result = [
-                max, 0, max, 0, max, 0, max, 0, max, 0, max, 0, max, 0, max, 0, max, 0, max, 0,
-                max, 0, max, 0, max, 0, max, 0, max, 0, max, 0, max, 0, max, 0, max, 0, max, 0
-            ];
-        var xStop = this.canvas.width - 10;
-        if (this.state != 'running') {
-            for (i = 0; i < result.length; i++) {
-                result[i] = parseInt(result[i] / this.image.width * 1000)/1000;
-            }
-            return result;
-        }
-        for (i = 0; i < result.length / 2; i++) {
-            offset = i * 2;
-            y = (i + 5) * 5;
+    Scanner.prototype.getBarrier = function (trex) {
+        var startX = Math.max(95, trex.x + 10);
+        var stopX = this.image.width - 10;
+        var startY = 25;
+        var stopY = this.image.height - 30;
+        var oldBarrier = this.barrier;
+        this.barrier = {x: this.image.width, y: 0, speed: 0};
 
-            for (x = xStart; x < xStop; x++) {
-                if (result[offset] == 600) {
+        if (this.state == 'running') {
+            for (var y = startY; y < stopY; y += 5) {
+                for (var x = startX; x < stopX; x += 1) {
+                    if (this.barrier.x < x) {
+                        break;
+                    }
+
                     if (!this.image.getPixel(x, y).isColor(this.color)) {
                         continue;
                     }
-                    result[offset] = x;
-                    continue;
-                }
 
-                if (result[offset] + 100 < x) {
+                    this.barrier.x = x;
+                    this.barrier.y = y;
                     break;
-                }
-                if (this.image.getPixel(x, y).isColor(this.color)) {
-                    result[offset + 1] = x - result[offset];
                 }
             }
         }
-        for (i = 0; i < result.length; i++) {
-            result[i] = parseInt(result[i] / this.image.width * 1000)/1000;
-        }
-        return result;
+
+        this.barrier.x = parseInt(this.barrier.x / this.image.width * 1000) / 1000;
+        this.barrier.y = parseInt(this.barrier.y / this.image.height * 1000) / 1000;
+        this.barrier.speed = parseInt((oldBarrier.x - this.barrier.x)*1000)/1000;
+        return this.barrier;
     };
 
     Scanner.prototype.getFitness = function () {

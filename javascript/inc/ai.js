@@ -6,7 +6,7 @@ define([
         this.init = false;
         this.trainingMode = true;
         this.learnRate = 0.3;
-        this.thresshold = 0.15;
+        this.thresshold = 0.1;
 
         this.runner = null;
         this.scanner = null;
@@ -114,6 +114,16 @@ define([
     AI.prototype._run = function () {
         var inputs = this.scanner.getInputs();
         this._printView(inputs);
+        if (!!this.inputContainer) {
+            this.inputContainer.innerHTML = JSON.stringify(inputs)
+                .split(',').join(",\n")
+                .split('{').join("{\n")
+                .split('}').join("\n}")
+                .split('[').join("[\n")
+                .split(']').join("]\n");
+        }
+
+        delete inputs.barrier.scan;
         var plainInputs = this.scanner.recursiveValues(inputs);
         var output = this.scanner.getOutput();
         var fitness = this.scanner.getFitness();
@@ -135,20 +145,13 @@ define([
                     this._fakeKeyBoardEvent('keyup', 38); // jump
                     this._fakeKeyBoardEvent('keydown', 40); // down
                 }
+                this.network.propagate(this.learnRate, [output]);
             }
         } else if (!this.trainingMode && plainInputs[0] == 0) {
             this._fakeKeyBoardEvent('keydown', 38); // jump
             this._fakeKeyBoardEvent('keyup', 38); // jump
         }
 
-        if (!!this.inputContainer) {
-            this.inputContainer.innerHTML = JSON.stringify(inputs)
-                .split(',').join(",\n")
-                .split('{').join("{\n")
-                .split('}').join("\n}")
-                .split('[').join("[\n")
-                .split(']').join("]\n");
-        }
         if (!!this.outputContainer) {
             this.outputContainer.innerHTML = JSON.stringify(output).split(",").join("\n");
         }
@@ -172,29 +175,30 @@ define([
         document.body.dispatchEvent ? document.body.dispatchEvent(eventObj) : document.body.fireEvent("on" + type, eventObj);
     };
 
-    AI.prototype._printView = function(input) {
+    AI.prototype._printView = function (input) {
         if (!this.viewCanvas) return;
-        if (input.state!=1) return;
+        if (input.state != 1) return;
+
         var context = this.viewCanvas.getContext('2d');
-
-        var w = this.viewCanvas.width;
-        var h = this.viewCanvas.height;
         context.restore();
-        context.clearRect(0,0,w,h);
-        //context.fillStyle = 'rgba(255,255,255,1)';
-        //context.fillRect(0,0,w,h);
-        context.fillStyle = 'rgba(255,0,255,0.25)';
-        context.fillRect(w*input.trexX-2,h*input.trexY-2,5,5);
 
-        for (var i=0;i<input.barriers.length/2;i++) {
-            var offset = i * 2;
-            context.fillRect(
-                (input.barriers[offset] * w),
-                ((i + 5) * 5)-1,
-                (input.barriers[offset+1] * w),
-                3
-            );
-        }
+        //clear
+        context.clearRect(0, 0, this.viewCanvas.width, this.viewCanvas.height);
+
+        // trex
+        context.fillStyle = 'rgba(255,0,255,0.25)';
+        context.fillRect(
+            input.trex.x * this.viewCanvas.width - 2,
+            input.trex.y * this.viewCanvas.height - 2,
+            5,
+            5
+        );
+        context.fillRect(
+            (input.barrier.x * this.viewCanvas.width) - 5,
+            (input.barrier.y * this.viewCanvas.height) - 5,
+            10,
+            10
+        );
         context.save();
     };
 
